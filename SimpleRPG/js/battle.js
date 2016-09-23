@@ -500,7 +500,6 @@ function fightAnimation(target,callback) {
                                 }
                             } else {
                                 g.currentScene.removeChild(this);
-                                if(this.dead) return;
                                 battle.gp += this.gp;
                                 battle.exp += this.exp;
 
@@ -580,7 +579,7 @@ function fightAnimation(target,callback) {
                         }
                     }
 
-                    t.addEventListener('enterframe',checkEnemyDead);
+                    if(!t.dead) t.addEventListener('enterframe',checkEnemyDead);
                 } else {//爆炸效果完成则退出场景
                     setTimeout(function() {
                         g.popScene();
