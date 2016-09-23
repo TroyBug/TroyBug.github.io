@@ -500,6 +500,7 @@ function fightAnimation(target,callback) {
                                 }
                             } else {
                                 g.currentScene.removeChild(this);
+                                this.removeEventListener('enterframe',checkEnemyDead);
                                 battle.gp += this.gp;
                                 battle.exp += this.exp;
 
@@ -521,7 +522,6 @@ function fightAnimation(target,callback) {
                                 }
 
                                 if(battle.enemies.length === 0) {
-                                    console.log(this);
                                     g.gp += battle.gp;
                                     g.exp += battle.exp;
 
