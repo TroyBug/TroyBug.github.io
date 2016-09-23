@@ -145,6 +145,7 @@ function addBattleScene(enemyGroupID) {
                                battle.isBoss ? g.resource['music04'] : g.resource['music09']);
                             battle.enemies = [];
                             battle.enemyLoaded = false;
+                            battle.roundEnd = true;
                             battle.battleInfo = [];
                         });
 
@@ -478,13 +479,14 @@ function fightAnimation(target,callback) {
                             idx_target++;
                             explosionRunning = false;
                             this.frame = 0;
-                            setTimeout(effectEx,10);
+                            setTimeout(effectEx,0);
                         }
                     });
 
                     var targetLife = t.age + 20;
                     //监测敌方hp，判断敌方是否已死亡
                     function checkEnemyDead() {
+                        this.bindEvent = true;
                         if(this.hp <= 0) {
                             if(!this.dead) {
                                 new SoundManage(g.resource['music15'],false,null,1);
@@ -565,6 +567,7 @@ function fightAnimation(target,callback) {
                                                         g.popScene();
                                                         g.popScene();
                                                         battle.enemyLoaded = false;
+                                                        battle.roundEnd = true;
                                                         if(battle.isBoss) battle.firstEnemy.dead = true;
                                                         new SoundManage(g.resource['music01'],true,g.resource['music17']);
                                                     }
@@ -579,7 +582,7 @@ function fightAnimation(target,callback) {
                         }
                     }
 
-                    if(!t.dead) t.addEventListener('enterframe',checkEnemyDead);
+                    if(!t.bindEvent) t.addEventListener('enterframe',checkEnemyDead);
                 } else {//爆炸效果完成则退出场景
                     setTimeout(function() {
                         g.popScene();
