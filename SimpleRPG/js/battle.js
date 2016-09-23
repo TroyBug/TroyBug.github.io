@@ -522,6 +522,7 @@ function fightAnimation(target,callback) {
                                 }
 
                                 if(battle.enemies.length === 0) {
+                                    console.log(this);
                                     g.gp += battle.gp;
                                     g.exp += battle.exp;
 
