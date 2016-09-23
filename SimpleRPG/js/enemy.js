@@ -168,7 +168,7 @@ var enemyConfig = {
         defence:5,
         hitRate:0.8,
         dodge:0.1,
-        speed:2,
+        speed:11,
         criticalStrike:0.2,
         callBackUp:true,
         isBoss:false,
@@ -208,7 +208,7 @@ var enemyConfig = {
         defence:5,
         hitRate:0.8,
         dodge:0.1,
-        speed:2,
+        speed:11,
         criticalStrike:0.2,
         callBackUp:true,
         isBoss:false,
@@ -248,7 +248,7 @@ var enemyConfig = {
         defence:5,
         hitRate:0.8,
         dodge:0.1,
-        speed:2,
+        speed:11,
         criticalStrike:0.2,
         callBackUp:true,
         isBoss:false,
@@ -323,27 +323,27 @@ var enemyConfig = {
         height:96,
         scaleX:2,
         scaleY:2,
-        hp:30,
+        hp:50,
         attack:7,
         defence:5,
         hitRate:0.8,
         dodge:0.1,
-        speed:2,
+        speed:15,
         criticalStrike:0.2,
         callBackUp:true,
         isBoss:true,
         skills:[
             {
                 name:'连续击打',
-                attack:9
+                attack:20
             },
             {
                 name:'触手乱舞',
-                attack:10
+                attack:15
             },
             {
                 name:'超声攻击',
-                attack:8
+                attack:18
             }
         ],
         skillRate:0.6,

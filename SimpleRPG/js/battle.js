@@ -141,7 +141,8 @@ function addBattleScene(enemyGroupID) {
                         battle.gp = 0;
                         battle.exp = 0;
                         new TransitionScene3(g.width,g.height,function() {
-                            new SoundManage(g.resource['music01'],true,g.resource['music09']);
+                            new SoundManage(g.resource['music01'],true,
+                               battle.isBoss ? g.resource['music04'] : g.resource['music09']);
                             battle.enemies = [];
                             battle.enemyLoaded = false;
                             battle.battleInfo = [];
@@ -385,7 +386,7 @@ function fight(emyList,ability) {
         battle.battleStart = true;
     }*/
 
-    console.log('行动列表:',battle.actionQueue);
+    //console.log('行动列表:',battle.actionQueue);
     (function actionByQueue() {
         if(battle.actionQueue.length && battle.roundEnd) {
             var el = battle.actionQueue.shift();
@@ -407,6 +408,7 @@ function fight(emyList,ability) {
 }
 
 function fightAnimation(target,callback) {
+    g.currentScene.removeChild(battle.damageInfo);
     battle.roundEnd = false;
     addBattleScene.group_2[1].visible =  true;  //显示武器
 
@@ -497,11 +499,11 @@ function fightAnimation(target,callback) {
                                     this.opacity = 1;
                                 }
                             } else {
+                                g.currentScene.removeChild(this);
+
                                 battle.gp += this.gp;
                                 battle.exp += this.exp;
 
-                                g.currentScene.removeChild(this);
-                                this.removeEventListener('enterframe',checkEnemyDead);
                                 //从列表中移除已消灭的敌人
                                 for(var i = 0; i < battle.enemies.length; i++) {
                                     var o = battle.enemies[i];
@@ -530,7 +532,7 @@ function fightAnimation(target,callback) {
                                     var currentLevel = p1.player.level;
 
                                     for(i = currentLevel; i < p1.player.levelStats.length; i++) {
-                                        if(currentLevel === p1.player.levelStats.length-1) break;
+                                        if(currentLevel === (p1.player.levelStats.length - 1)) break;
                                         if(g.exp >= p1.player.levelStats[i].expMax) {
                                             p1.player.level = i;
                                             if(p1.player.level > currentLevel ) {
@@ -576,7 +578,7 @@ function fightAnimation(target,callback) {
                     }
 
                     t.addEventListener('enterframe',checkEnemyDead);
-                } else {
+                } else {//爆炸效果完成则退出场景
                     setTimeout(function() {
                         g.popScene();
                         addBattleScene.group_2[1].visible = false;  //隐藏武器
@@ -584,7 +586,7 @@ function fightAnimation(target,callback) {
                         setTimeout(function() {
                             battle.roundEnd = true;
                             callback && callback();
-                        },1200);
+                        },1300);
                     },1000);
                 }
             })();

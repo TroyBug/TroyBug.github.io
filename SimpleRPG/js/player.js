@@ -37,19 +37,21 @@ Player.p1Attributes = {
     maxEquipCount:5,
     levelStats:[
         {},
-        { attack: 20, maxHp: 80, maxMp: 20, expMax: 0, speed:5, power:5 },
-        { attack: 22, maxHp: 100, maxMp: 22, expMax: 3, speed:7, power:6 },
-        { attack: 24, maxHp: 120, maxMp: 26, expMax: 7, speed:8, power:7 },
-        { attack: 26, maxHp: 150, maxMp: 30, expMax: 11, speed:10, power:9 }
+        { attack: 8, maxHp: 80, maxMp: 20, expMax: 0, speed:5, power:5 },
+        { attack: 10, maxHp: 100, maxMp: 22, expMax: 10, speed:7, power:6 },
+        { attack: 12, maxHp: 120, maxMp: 26, expMax: 20, speed:8, power:7 },
+        { attack: 15, maxHp: 150, maxMp: 30, expMax: 40, speed:10, power:9 }
     ]
 };
 
+Player.minEnCounterStep = 64;
+Player.maxEnCounterStep = 255;
 
 Player.prototype = {
     constructor:Player,
     init:function(options) {
         this.map = options.map;
-        this.encounterStep = rangeRand(64,128);
+        this.encounterStep = rangeRand(Player.minEnCounterStep,Player.maxEnCounterStep);
         this.player = this.addPlayer(options);
         this.player.stop = false;
         this.player.aspect = null;
@@ -326,24 +328,24 @@ Player.prototype = {
                 if(g.encounter) {
                     this.encounterStep -= 4;
                 } else {
-                    this.encounterStep = rangeRand(64,128);
+                    this.encounterStep = rangeRand(Player.minEnCounterStep,Player.maxEnCounterStep);
                 }
                 //遇敌
                 if(this.encounterStep <= 0 && !gameEv.findTile(p1.square().x,p1.square().y,g.mapCode)) {
                     var enemyGroupID = 0;
                     var firstEnemy;
                     (function reSelect() {
-                        if(that.x <= 320 && that.y >= 800) {
+                        if(that.x <= 320 && that.y >= 800) {//进入boss遭遇范围
                             enemyGroupID = [0,2][rand(2)];
                         }
                         if((firstEnemy = enemyConfig[enemyGroup[enemyGroupID].enemies[0]]).dead) {
                             reSelect();
                         }
                     })();
-
-                    console.log(enemyGroupID);
+                    //enemyGroupID = 2;
+                    //console.log(enemyGroupID);
                     battle(enemyGroupID,firstEnemy);
-                    this.encounterStep = rangeRand(64,128);
+                    this.encounterStep = rangeRand(Player.minEnCounterStep,Player.maxEnCounterStep);
                 }
 
             }
