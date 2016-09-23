@@ -491,7 +491,7 @@ function fightAnimation(target,callback) {
                                 battle.damageInfo.text += '打倒了'+(t.aliasName || t.name)+'!<br/>';
                                 g.currentScene.addChild(battle.damageInfo);
                                 this.dead = true;
-                            } else return;
+                            }
                             if(this.age <= targetLife) {
                                 if(this.age % 2 === 0) {
                                     this.opacity = 0;
@@ -500,7 +500,7 @@ function fightAnimation(target,callback) {
                                 }
                             } else {
                                 g.currentScene.removeChild(this);
-
+                                if(this.dead) return;
                                 battle.gp += this.gp;
                                 battle.exp += this.exp;
 
