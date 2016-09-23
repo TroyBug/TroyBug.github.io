@@ -175,7 +175,7 @@ var enemyConfig = {
         isBoss:false,
         skills:[
             {
-                name:'捕食',
+                name:'吮吸',
                 attack:5
             },
             {
@@ -215,7 +215,7 @@ var enemyConfig = {
         isBoss:false,
         skills:[
             {
-                name:'捕食',
+                name:'缠绕',
                 attack:5
             },
             {
@@ -259,7 +259,7 @@ var enemyConfig = {
                 attack:5
             },
             {
-                name:'猛扑',
+                name:'注射',
                 attack:6
             }
         ],
@@ -299,7 +299,7 @@ var enemyConfig = {
                 attack:5
             },
             {
-                name:'猛扑',
+                name:'拍打',
                 attack:6
             }
         ],
@@ -339,11 +339,11 @@ var enemyConfig = {
                 attack:20
             },
             {
-                name:'触手乱舞',
+                name:'挥舞触手',
                 attack:15
             },
             {
-                name:'超声攻击',
+                name:'超声波攻击',
                 attack:18
             }
         ],
