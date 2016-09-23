@@ -36,7 +36,7 @@ var gameEv = [//197,208
             this.lock = true;
 
             var that = this,
-                spl = new SignPostLabel('小镇 沙漠绿洲',function() {
+                spl = new SignPostLabel('补给站',function() {
                     that.lock = false;
                 });
         }
