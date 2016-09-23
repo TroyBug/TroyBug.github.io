@@ -98,7 +98,8 @@ function enemyAction(player,callback) {
             if(player.hp <= 0) {
                 battle.p1Hp.text = 'HP0';
                 gameOver();
-                new SoundManage(g.resource['lose'],true,g.resource['music09']);
+                new SoundManage(g.resource['lose'],true,
+                   battle.isBoss ? g.resource['04'] : g.resource['music09']);
                 return;
             }
 
@@ -323,7 +324,7 @@ var enemyConfig = {
         height:96,
         scaleX:2,
         scaleY:2,
-        hp:50,
+        hp:20,
         attack:7,
         defence:5,
         hitRate:0.8,
