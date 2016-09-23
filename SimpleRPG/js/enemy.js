@@ -324,7 +324,7 @@ var enemyConfig = {
         height:96,
         scaleX:2,
         scaleY:2,
-        hp:10,
+        hp:30,
         attack:7,
         defence:5,
         hitRate:0.8,

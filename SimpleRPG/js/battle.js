@@ -555,23 +555,25 @@ function fightAnimation(target,callback) {
                                         g.currentScene.removeChild(battle.damageInfo);
                                         battleResultScene.addChild(info);
                                         g.pushScene(battleResultScene);
+
+                                        var keyCount = 0;
+                                        var waitFor = battleResultScene.age + 30;
+                                        battleResultScene.on('enterframe',function() {
+                                            if(this.age >= waitFor) {
+                                                if(g.input.a) {
+                                                    if(keyCount++ === 1) {
+                                                        g.popScene();
+                                                        g.popScene();
+                                                        battle.enemyLoaded = false;
+                                                        if(battle.isBoss) battle.firstEnemy.dead = true;
+                                                        new SoundManage(g.resource['music01'],true,g.resource['music17']);
+                                                    }
+                                                } else keyCount = 0;
+                                            }
+                                        });
                                     },400);
 
-                                    var keyCount = 0;
-                                    var waitFor = battleResultScene.age + 30;
-                                    battleResultScene.on('enterframe',function() {
-                                        if(this.age >= waitFor) {
-                                            if(g.input.a) {
-                                                if(keyCount++ === 1) {
-                                                    g.popScene();
-                                                    g.popScene();
-                                                    battle.enemyLoaded = false;
-                                                    if(battle.isBoss) battle.firstEnemy.dead = true;
-                                                    new SoundManage(g.resource['music01'],true,g.resource['music17']);
-                                                }
-                                            } else keyCount = 0;
-                                        }
-                                    });
+
                                 }
                             }
                         }

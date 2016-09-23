@@ -44,8 +44,8 @@ Player.p1Attributes = {
     ]
 };
 
-Player.minEnCounterStep = 64;
-Player.maxEnCounterStep = 255;
+Player.minEnCounterStep = 8;
+Player.maxEnCounterStep = 12;
 
 Player.prototype = {
     constructor:Player,
