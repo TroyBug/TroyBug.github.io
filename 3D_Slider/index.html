@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>3D 轮播图</title>
+	<style>
+    /*css reset*/
+		body{margin: 0;}
+		ul,li,p,ol{margin: 0;padding: 0;}
+		li{list-style: none}
+		img{border: 0; vertical-align: bottom}
+	
+	/*最外层容器*/
+		.container{
+			width: 1000px;
+			margin: 50px auto;
+			-webkit-perspective: 1200;	/*对最外层容器设置景深*/
+			perspective: 1200;
+			position: relative;
+		}
+	/*ul*/
+		.slider{
+			width: 1000px;
+			height: 300px;
+			overflow: visible;
+			position: relative;	/*里面动态生成的元素需要绝对定位*/
+			/*transform-style: preserve-3d; 不能对ul设置该属性否则会出现叠加顺序问题*/
+		}
+	/*ul li*/
+		.slider li{
+			width: 1000px;
+			height: 300px;
+			display: none;	/*初始全部隐藏只显示第一张*/
+		}
+	/*左右控制按钮*/
+		.prev,.next{
+			position: absolute;
+			text-decoration: none;
+			color: #999;
+			width: 100px;
+			height: 100px;
+			text-align: center;
+			line-height: 100px;
+			border-radius: 50%;
+			font-size: 100px;
+			top:50%; 
+			margin-top: -50px;
+		}
+		.prev{left: -150px;}
+		.next{right:-150px;}
+		.prev:hover,.next:hover{background-color: #dfdfdf}
+	
+	/*动态生成的div容器，用来控制3d效果*/
+		.s-box{
+			position: relative;
+			width: 1000px;
+			height: 300px;
+		}
+		.s-box > div{/*将图片分成N个块， 每一块的样式*/
+			position: absolute;
+			transform: translateZ(-150px) rotateX(0deg);	/*向Z轴(屏幕正面)后退， 以此来改变转轴中心*/
+			transform-style: preserve-3d;	/*设置为3d效果*/
+			backface-visibility: hidden;	/*隐藏后面的元素*/
+			transition:transform 600ms ease;	/*设置缓动*/
+		}	
+		.s-box-item{/*每个块中的正面， 背面， 右左上下， 最后组成一个长方体*/
+			position: absolute;
+			background-color: #000;
+			/*向Z轴(屏幕正面)前进， 将图片大小恢复至正常*/
+			transform: translateZ(150px) rotate3d(1,0,0,0deg);
+			width: 200px;
+			height: 300px; 
+		}
+	/*控制按钮*/
+		.controlBtns{text-align: center; margin-top: 40px;}
+		.controlBtns a{
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+			border-radius: 50%;
+			overflow: hidden;
+			background-color: #aaa;
+		}
+		.controlBtns a:hover,.controlBtns a.active{background-color: #f50}
+	</style>
+	<script src="jquery.js"></script>
+</head>
+<body>
+	<div class="container">
+		<!--左右切换按钮-->
+		<a class="prev" href="javascript:void(0)">&lt;</a>
+		<a class="next" href="javascript:void(0)">&gt;</a>
+		<!--图片-->
+		<ul class="slider">
+			<li class="current" style="display:block"><img src="images/1.jpg" alt=""></li>
+			<li><img src="images/2.jpg" alt=""></li>
+			<li><img src="images/3.jpg" alt=""></li>
+			<li><img src="images/4.jpg" alt=""></li>
+		</ul>
+	</div>
+	<!--选择器-->
+	<div class="controlBtns">
+		<a class="active" href="javascript:void(0)"></a>
+		<a href="javascript:void(0)"></a>
+		<a href="javascript:void(0)"></a>
+		<a href="javascript:void(0)"></a>
+	</div>
+	<script>
+		function Slider3D () {
+			return this.init.apply(this,arguments);
+		};
+		
+		Slider3D.prototype = {
+			constructor: Slider3D,
+			init:function(options) {
+				this.prevBtn = $('.prev');
+				this.nextBtn = $('.next');
+				this.slider = $('.slider');
+				this.controlBtns = $('.controlBtns');
+				this.num = this.slider.find('li').length;
+				this.step = options.step || 150;
+				this.speed = options.speed || 600;
+				//初始索引
+				this.idx = 0;
+				//分割为多少张图片
+				this.splitNum = options.splitNumber || 5;
+				//每块图片的宽度
+				this.width = Math.ceil( this.slider.width() / this.splitNum );
+				//高度
+				this.height = this.slider.height();
+				//线程锁
+				this.isAnimate = false;
+				
+				var that = this;
+
+				this.nextBtn.bind('click',function() {
+					if(that.isAnimate) return; 
+					var fromPos = that.getCurrentLi();
+					that.idx = that.changePos('next');
+					that.hideImg();
+					that.generateHTML(that.idx,fromPos,'next');
+				});
+				
+				this.prevBtn.bind('click',function() {
+					if(that.isAnimate) return;
+					var fromPos = that.getCurrentLi();
+					that.idx = that.changePos('prev');
+					that.hideImg();
+					that.generateHTML(that.idx,fromPos,'prev');
+				});
+				
+				this.controlBtns.bind('click',function(e) {
+					if(that.isAnimate) return;
+					
+					var tag = e.target || e.srcElement,
+						lCase = tag.tagName.toLowerCase(),
+						aBtns = $(this).find('a'),
+						index; 
+						
+					if(lCase === 'a') {
+						index = $(tag).index();
+						aBtns.removeClass();
+						aBtns.eq(index).addClass('active');
+						
+						if(that.idx < index) {
+							that.hideImg();
+							that.generateHTML(index,that.idx,'next',function() {
+								that.changePos(index);
+							});	
+						} else if (that.idx > index) {
+							that.hideImg();
+							that.generateHTML(index,that.idx,'prev',function() {
+								that.changePos(index);
+							});
+						} else {
+							return;
+						}  
+					}
+				});
+			},
+			//更新当前的图片索引
+			changePos:function(dir) {
+				var pos = this.idx;
+				
+				if(typeof dir !== 'string') {
+					pos = this.idx = dir;
+					return pos;
+				}
+				
+				if(dir === 'next') {
+					pos = pos < (this.num - 1) ? ++pos : 0;
+				} else if(dir === 'prev') {
+					pos = pos > 0 ? --pos : (this.num - 1);
+				}	
+				
+				return pos;
+			},
+			//隐藏所有图片
+			hideImg:function(){
+				this.slider.find('li').css('display','none').removeClass();	
+			},
+			//显示指定图片
+			showImg:function(pos) {
+				this.slider.find('li').eq(pos).show().addClass('current');	
+			},
+			getCurrentLi:function() {
+				var index;
+				this.slider.find('li').each(function(i) {
+					if($(this).hasClass('current')) {
+						index = i;
+						return false;
+					}
+				});
+				return index;
+			},
+			//移除动画层
+			removeHTML:function() {
+				$('.s-box').remove();	
+			},
+			//生成动画层
+			generateHTML:function(toPos,fromPos,dir,callback) {
+				var sBox = $('<div class="s-box" />'),
+					i = 0,
+					j = 0,
+					len = this.splitNum,
+					srcPos,
+					middle = Math.ceil( len / 2 ),
+					imgs = this.slider.find('img'),
+					that = this;
+									
+				for(; i < len; i++) {
+					var fragment = $('<div>');
+					
+					fragment.css({
+						left: i * that.width + 'px',
+						height: '300px',
+						width: that.width + 'px',
+						zIndex: i < middle ? (i + 1) : --middle,
+						transform:'translateZ(-150px) rotateX(0deg)',
+						transition:'transform '+that.speed+'ms ease-in-out'
+					});
+					
+					/*生成如下格式
+					<div></div> 正面
+					<div></div> 背面
+					<div></div> 右面
+					<div></div> 左面
+					<div></div> 上面
+					<div></div> 下面
+					*/					
+					
+					for(var j = 0; j < 6; j++) {
+						var sItem = $('<div class="s-box-item">');
+						
+						switch (j) {
+							case 0://正面
+								sItem.css({
+									backgroundImage:'url('+imgs.eq( fromPos ).attr('src')+')',
+									backgroundRepeat:'no-repeat',
+									backgroundPosition: -this.width * i + 'px 0px'
+								});
+								break;
+							case 1://背面 
+								sItem.css({
+									transform:'rotateY(180deg) translateZ(150px)'
+								});
+								break;
+							case 2://右面
+								sItem.css({
+									transform:'rotateY(90deg) translateZ(50px)',
+									left: 0,
+									top: 0,
+									width: this.height + 'px'
+								});
+								break;
+							case 3://左面
+								sItem.css({
+									transform:'rotateY(90deg) translateZ(50px)',
+									left: -this.width + 'px',
+									top: 0,
+									width: this.height + 'px'
+								});
+								break;
+							case 4://上面
+								if( dir === 'next' && (fromPos < toPos) ) {
+									sItem.css({
+										backgroundImage:'url('+imgs.eq( toPos ).attr('src')+')',
+										backgroundRepeat:'no-repeat',
+										backgroundPosition: -this.width * i + 'px 0px'
+									});
+								} else if(dir === 'next' && (fromPos === (this.num - 1) ) ) {
+									sItem.css({
+										backgroundImage:'url('+imgs.eq( 0 ).attr('src')+')',
+										backgroundRepeat:'no-repeat',
+										backgroundPosition: -this.width * i + 'px 0px'
+									});
+								}
+
+								sItem.css({
+									transform:'rotateX(90deg) translateZ(150px)'
+								});
+								break;
+							case 5://下面
+								if( dir === 'prev' && (fromPos > toPos) ) {
+									sItem.css({
+										backgroundImage:'url('+imgs.eq( toPos ).attr('src')+')',
+										backgroundRepeat:'no-repeat',
+										backgroundPosition: -this.width * i + 'px 0px'	
+									});	
+								} else if( dir === 'prev' && ( fromPos === 0 ) ) {
+									sItem.css({
+										backgroundImage:'url('+imgs.eq( this.num - 1 ).attr('src')+')',
+										backgroundRepeat:'no-repeat',
+										backgroundPosition: -this.width * i + 'px 0px'	
+									});
+								}
+								sItem.css({
+									transform:'rotateX(-90deg) translateZ(150px)'
+								});
+								break;
+							default:break;
+						}
+						
+						fragment.append(sItem);
+					}
+					sBox.append(fragment);		
+				}	
+						
+				this.slider.append(sBox);
+				this.animate(toPos,dir,callback);
+			},
+			//效果动画
+			animate:function(pos,dir,callback) {
+				var i = 0,
+					len = this.splitNum,
+					count = len,
+					animateBox = $('.s-box > div'),
+					deg = dir === 'next' ? -90 : 90,
+					that = this; 
+					
+				if(this.isAnimate) return false;
+				this.isAnimate = true;
+				
+				//对每个块执行动画效果
+				for(; i < len; i++) {
+					doAnimate(i,animateBox.eq(i));
+				}
+				
+				function doAnimate(n,o) {
+					that.controlBtns.find('a').removeClass();
+					that.controlBtns.find('a').eq(pos).addClass('active');
+					setTimeout(function() {
+						o.css({
+							transform:'translateZ(-150px) rotateX('+deg+'deg)'
+						});
+						count--;
+						if(count === 0) {//所有块的动画效果执行完毕
+							setTimeout(function() {
+								that.removeHTML();
+								that.showImg(pos);
+								that.isAnimate = false;	
+								callback && callback.call(that);
+							},that.step * n + 30);
+						}
+					},that.step * n + 30);
+				}
+			}
+		};
+		
+		var slider = new Slider3D({
+			splitNumber:5,
+			step:150,
+			speed:400	//ms
+		});
+		
+		
+	</script>
+</body>
+</html>
