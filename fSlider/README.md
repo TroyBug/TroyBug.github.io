@@ -19,3 +19,7 @@ $('#slider').fullScreenSlider({
   seamless:true,  //(optional)是否衔接滚动
   controller:'.controllBtns'  //控制器
 });
+```
+
+### 演示
+[Demo](https://troybug.github.io/fSlider)
