@@ -22,4 +22,4 @@ $('#slider').fullScreenSlider({
 ```
 
 ### 演示
-[Demo](https://troybug.github.io/fSlider)
+[Demo](https://troybug.github.io/fSlider/)
