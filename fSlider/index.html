@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+ <html lang="en">
+ <head>
+ 	<meta charset="UTF-8">
+ 	<title>全屏轮播图</title>
+ 	<style>
+ 		html,body{overflow: hidden;}
+		body{margin: 0;}
+		ul,ol,li,p{margin: 0; padding: 0;}
+		li{list-style-type: none;}
+		img{border: 0; vertical-align: middle;}
+
+		.pr{position: relative;}
+		.slider{
+			overflow: hidden;
+			margin: 0 auto;
+			position: relative;
+			height: 300px;
+		}
+		.slider li{
+			float: left;
+			overflow: hidden;
+			position: absolute;
+			height: 300px;
+		}
+		.slider li img{
+			position: relative;
+		}
+		.controllBtns{
+			position: absolute;
+			text-align: center;
+			width: 100%;
+			bottom: 10px;
+			left: 0;
+			z-index: 2;
+		}
+		.controllBtns a{
+			width: 15px;
+			height: 15px;
+			border-radius: 50%;
+			overflow: hidden;
+			display: inline-block;
+			background-color: #000;
+			margin-right: 10px;
+		}
+		.controllBtns a.active{
+			background-color: #fff;
+		}
+ 	</style>
+ 	<script src="jquery.js"></script>
+ </head>
+ <body>
+ 	<div id="slider" class="pr">
+	 	<ul class="slider">
+	 		<li><img src="1.jpg" alt=""></li>
+	 		<li><img src="2.jpg" alt=""></li>
+	 		<li><img src="3.jpg" alt=""></li>
+	 	</ul>
+	 	<div class="controllBtns"></div>
+ 	</div>
+
+ 	<script>
+ 		(function($,d,w) {
+ 			$.fn.fullScreenSlider = function(options) {
+ 				var options = $.extend(defaults,options || {}),
+ 					that = $(this),
+ 					i = 0,
+ 					ul = that.find('ul'),	//获取容器下的ul元素
+ 					lis = ul.find('li'),	//获取ul下的li元素
+ 					imgs = ul.find('img'),	//获取ul下的img元素
+ 					len = lis.length,		//获取li个数
+ 					curScreenWidth = d.documentElement.clientWidth,	//视口宽度
+ 					originW = ul.find('img')[0].offsetWidth,	//原始图片宽度
+ 					controller = that.find(options.controller),	//控制器容器
+ 					btns,	//控制器按钮
+ 					curIndex = 0,	//当前索引
+ 					lock = false,
+ 					isContinue = options.seamless;	//是否无缝滚动
+
+ 				if(isContinue) {
+ 					var clone = lis.eq(0).clone().css({width:curScreenWidth + 'px'});
+ 					ul.append(clone);
+ 					clone.css({left: clone.index() * curScreenWidth + 'px'});
+ 				}
+
+ 				//生成对应的控制器按钮
+ 				for(; i < len; i++) {
+ 					controller.append($('<a>',{href:'javascript:void(0)'}));
+ 				}
+ 				btns = controller.find('a');
+ 				btns.eq(0).addClass('active');
+ 				
+ 				setProperty();
+
+ 				btns.each(function() {
+ 					$(this).click(function() {
+ 						if(lock) return;
+ 						lock = true;
+ 						curIndex = $(this).index();
+ 						btns.removeClass('active');
+ 						$(this).addClass('active');
+
+ 						
+ 						$('.slider').animate({
+ 							left: -curIndex * curScreenWidth + 'px'
+ 						},function() {
+ 							lock = false;
+ 						});
+
+ 					});
+ 				});
+
+ 				var LIs = that.find('li');	//由于添加了clone结点，所以重新获取li的个数
+
+ 				//自动播放
+ 				function autoPlay(idx) {
+					$('.slider').animate({
+						left: -idx * curScreenWidth + 'px'
+					},function() {
+						if(isContinue) {
+							if(idx === len) {//假如到了最后一张
+								curIndex = 0;
+
+								//将前几张排到最后一张后，即最后一张变成第一张
+								LIs.not(LIs.eq(-1)).appendTo(ul);
+								LIs.eq(0).appendTo(ul);
+								//重新获取一次以保证各个li的顺序
+								var nLis = that.find('li');
+								nLis.each(function(i) {
+									$(this).css('left', i * curScreenWidth + 'px');
+								});
+								ul.css('left',0);
+							}
+						}
+					});
+					btns.removeClass('active');
+					if(idx === len) {
+						btns.eq(0).addClass('active');
+					} else {
+						btns.eq(idx).addClass('active');
+					}
+ 				}
+
+ 				that.timer = setInterval(function() {
+ 					curIndex++;
+ 					if(isContinue) {
+	 					if(curIndex > len) {
+	 						curIndex = 0;
+	 					}
+ 					} else {
+ 						if(curIndex > len - 1) curIndex = 0;
+ 					}
+ 					autoPlay(curIndex);
+ 				},options.speed);
+
+ 				that.bind('mouseover',function() {
+ 					if(that.timer) clearInterval(that.timer);
+ 				}).bind('mouseout',function() {
+					that.timer = setInterval(function() {
+						curIndex++;
+	 					if(isContinue) {
+		 					if(curIndex > len) {
+		 						curIndex = 0;
+		 					}
+	 					} else {
+	 						if(curIndex > len - 1) curIndex = 0;
+	 					}
+	 					autoPlay(curIndex);
+	 				},options.speed); 					
+ 				});
+
+ 				function setProperty() {
+ 					//设置外层容器的宽度
+ 					var l = that.find('li').length;
+ 					ul.css({
+ 						width: curScreenWidth * l + 'px',
+ 						left: - curIndex * curScreenWidth + 'px'
+ 					});
+ 					//设置li的宽度及left值
+ 					var lis = that.find('li');
+ 					lis.each(function() {
+ 						$(this).css({
+ 							width: curScreenWidth + 'px',
+ 							left: $(this).index() * curScreenWidth + 'px'
+ 						});
+ 					});
+ 					//设置img的left值使其居中显示
+ 					var imgages = that.find('img');
+ 					imgages.each(function() {
+ 						$(this).css({
+ 							left: -(originW - curScreenWidth) / 2 + 'px'
+ 						});
+ 					});
+
+ 					//fixed ie6
+ 					controller.css('width',curScreenWidth + 'px');
+ 				};
+
+				var toResize = function() {
+ 					curScreenWidth = d.documentElement.clientWidth;
+ 					setTimeout(function() {
+ 						setProperty();
+ 					},100);
+ 				};
+
+ 				$(w).bind('resize',function() {
+ 					toResize();
+ 				});
+ 			};
+
+ 			var defaults = {
+ 				controller: '.controllBtns',	//控制器
+ 				seamless: true,	//是否无缝滚动
+ 				speed: 5000	//轮播间隔
+ 			};
+
+ 		})(jQuery,document,window);
+
+ 		$(window).bind('load',function() {
+	 		$('#slider').fullScreenSlider({
+	 			speed: 3000
+	 		});
+ 		});
+ 	</script>
+ </body>
+ </html> 
